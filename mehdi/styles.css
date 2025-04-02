@@ -87,7 +87,7 @@ label {
 button {
     width: 100%;
     padding: 10px;
-    background-color: #A48374;
+    background-color: #5F6F52;
     color: white;
     font-weight: bold;
     border: none;
@@ -105,7 +105,7 @@ button:hover {
 
 .card-footer a {
     text-decoration: none;
-    color: #A48374;
+    color: #5F6F52;
 }
 
 /* Blob Background */
