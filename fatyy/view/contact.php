@@ -5,7 +5,7 @@ include("../controller/traitement.php");
 
 if (!empty($_POST)) {
 
-    if (isset($_POST['name'], $_POST['email'], $_POST['message'])) {
+    if (isset($_POST['name'], $_POST['email'], $_POST['message'])&& isset($_POST['submit_contact'])) {
         AddQuestion($cnx, $_POST);
     }
 }
@@ -106,7 +106,7 @@ if (!empty($_POST)) {
                 <textarea id="message" name="message" rows="5" required></textarea>
             </div>
             
-            <button type="submit" class="submit-btn">SOUMETRE</button>
+            <button type="submit" name="submit_contact" class="submit-btn">SOUMETRE</button>
         </form>
     </div>
 </body>
