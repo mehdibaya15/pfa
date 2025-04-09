@@ -24,4 +24,11 @@ function AjouterAvis($cnx,$data){
         return false;
     }
 }
+function insertAnimals($cnx){
+    $req="SELECT * from animaux";
+    $res=$cnx->query($req);
+    $animaux=$res->fetchAll();
+    return $animaux;
+
+}
 ?>
