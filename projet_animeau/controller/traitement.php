@@ -31,4 +31,12 @@ function insertAnimals($cnx){
     return $animaux;
 
 }
+function insertAnimalByCategorie($cnx, $categorie) {
+    $req = "SELECT * FROM animaux WHERE categorie = :categorie";
+    $stmt = $cnx->prepare($req);
+    $stmt->bindParam(':categorie', $categorie);
+    $stmt->execute();
+    
+    return $stmt->fetchAll();
+}
 ?>
