@@ -136,4 +136,104 @@ function redirect($url) {
     header("Location: $url");
     exit;
 }
+function rechercheAnimalIndexee($cnx, $searchTerm) {
+    require_once __DIR__.'/../vendor/autoload.php';
+    $results = [];
+
+    try {
+        // Détection spéciale pour la recherche par âge
+        if (preg_match('/^(\d+)\s*(ans?)?$/i', trim($searchTerm), $matches)) {
+            $ageRecherche = (int)$matches[1];
+            
+            // Recherche exacte par âge
+            $stmt = $cnx->prepare("SELECT *, 1.0 as score FROM animaux WHERE age = ?");
+            $stmt->execute([$ageRecherche]);
+            return $stmt->fetchAll();
+        }
+
+        // Recherche sémantique standard
+        $stmt = $cnx->query("SELECT id_animal, nom, race, description, categorie, ville, age FROM animaux");
+        $animaux = $stmt->fetchAll();
+        
+        if (empty($animaux)) {
+            return [];
+        }
+        
+        $documents = [];
+        foreach ($animaux as $animal) {
+            $documents[$animal['id_animal']] = implode(' ', [
+                $animal['nom'],
+                $animal['race'],
+                $animal['description'],
+                $animal['categorie'],
+                $animal['ville'],
+                'age_'.$animal['age']  
+            ]);
+        }
+
+        // Initialisation des composants TF-IDF
+        $tfIdf = new \Phpml\FeatureExtraction\TfIdfTransformer();
+        $vectorizer = new \Phpml\FeatureExtraction\TokenCountVectorizer(
+            new \Phpml\Tokenization\WordTokenizer()
+        );
+        
+        // Vectorisation
+        $samples = array_values($documents);
+        $vectorizer->fit($samples);
+        $vectorizer->transform($samples);
+        $tfIdf->fit($samples);
+        $tfIdf->transform($samples);
+        
+        // Traitement de la requête
+        $querySample = [str_replace([' ans', 'an'], '', $searchTerm)]; // Nettoie la requête
+        $vectorizer->transform($querySample);
+        $tfIdf->transform($querySample);
+        $queryVector = current($querySample);
+        
+        // Calcul des similarités
+        $similarities = [];
+        foreach ($samples as $id => $docVector) {
+            $similarities[$id] = cosineSimilarity($queryVector, $docVector);
+        }
+        
+        // Tri des résultats
+        arsort($similarities);
+        
+        // Récupération des animaux pertinents
+        $animalIds = array_keys($documents);
+        foreach ($similarities as $id => $score) {
+            if ($score > 0.1) {
+                $stmt = $cnx->prepare("SELECT * FROM animaux WHERE id_animal = ?");
+                $stmt->execute([$animalIds[$id]]);
+                $animal = $stmt->fetch();
+                if ($animal) {
+                    $animal['score'] = $score;
+                    $results[] = $animal;
+                }
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Erreur recherche: ".$e->getMessage());
+        return [];
+    }
+
+    return $results;
+}
+
+function cosineSimilarity(array $vecA, array $vecB): float {
+    $dotProduct = 0.0;
+    $normA = 0.0;
+    $normB = 0.0;
+    
+    foreach ($vecA as $key => $value) {
+        $dotProduct += $value * ($vecB[$key] ?? 0);
+        $normA += $value ** 2;
+    }
+    
+    foreach ($vecB as $value) {
+        $normB += $value ** 2;
+    }
+    
+    return $normA > 0 && $normB > 0 ? $dotProduct / (sqrt($normA) * sqrt($normB)) : 0;
+}
 ?>
