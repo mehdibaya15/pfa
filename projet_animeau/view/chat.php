@@ -67,7 +67,8 @@ if (isset($_GET['search1']) && !empty($_GET['search1'])) {
             <div class="animals-listing">
                 <div class="container">
                     <div class="row">
-                        <?php foreach ($animaux as $animal): ?>  
+    <?php if(!empty($animaux)):?>                    
+    <?php foreach ($animaux as $animal): ?>  
                         <div class="col-lg-4 col-md-6 mb-4">
                             <div class="card animal-card">
                                 <div class="animal-badge"></div>
@@ -87,6 +88,11 @@ if (isset($_GET['search1']) && !empty($_GET['search1'])) {
                             </div>
                         </div>
                         <?php endforeach; ?>
+     <?php else: ?>
+                            <div class="col-12">
+                                <div class="alert alert-warning">Aucun animal disponible pour le moment.</div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     
                     <nav aria-label="Page navigation">
