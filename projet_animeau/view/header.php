@@ -132,9 +132,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         <a class="nav-link" href="magasin.php">BOUTIQUE</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">ADOPTIONS</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="contact.php">CONTACT</a>
                     </li>
                 </ul>
