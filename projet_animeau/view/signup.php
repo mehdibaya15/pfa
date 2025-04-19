@@ -1,28 +1,27 @@
 <?php
+session_start();
 include("../config/database.php");
 include("../controller/traitement.php");
-
-if (isset($_POST['submit_user'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'];
     $prenom = $_POST['prenom'];
     $email = $_POST['email'];
     $password = $_POST['password'];
     $stmt = $cnx->prepare("SELECT email FROM utilisateur WHERE email = :email");
-    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':email',$email);
     $stmt->execute();
     $emailEx = $stmt->fetch();
     if ($emailEx) {
         $error_message = "Cet email est déjà enregistré.";
     } 
-    else {
-        if (AjouterUtilisateur($cnx, $_POST)) {
-            $_SESSION['user'] = [
-                'email' => $email,
-                'nom' => $nom,
-                'prenom' => $prenom
-            ];
-            header("Location: dashboard.php");
-            exit();
+     else {
+    $user = AjouterUtilisateur($cnx, $_POST);
+    if ($user) {
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['nom'] = $user['nom'];
+        $_SESSION['prenom'] = $user['prenom'];
+        redirect('./home_page.php'); // Assurez-vous que cette fonction fonctionne
+        exit();
         } 
         else {
             $error_message = "Une erreur s'est produite lors de l'inscription.";
@@ -81,7 +80,7 @@ if (isset($_POST['submit_user'])) {
                             <div class="input-icon">
                                 <input type="password" id="password" name="password" placeholder="******" required>
                                 <span class="icon">🔒</span>
-                                <span class="toggle-password">👁️</span>
+                                <span class="toggle-password">🙈</span>
                             </div>
                         </div>
                         <?php if (isset($error_message)) { echo "<p class='error-message'>$error_message</p>"; } ?>
