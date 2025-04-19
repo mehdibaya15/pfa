@@ -1,16 +1,24 @@
 <?php
-include("../config/database.php");
 include("../controller/traitement.php");
-if (isset($_POST['submit_user'])){
-    $email= $_POST['email'];
-    $password= $_POST['password'];
-    $user=validLogIn($cnx,$email,$password);
-    if ($user) {
-        $_SESSION['user'] = $email;
-        header("Location: dashboard.php");
-        exit();
+include("../config/database.php");
+session_start();
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    if (!empty($email) && !empty($password)) {
+        $user = validLogIn($cnx, $email, $password);
+
+        if ($user) {
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['nom'] = $user['nom'];
+            redirect('./home_page.php');
+        } else {
+            $error = "Identifiants invalides !";
+        }
     } else {
-        $error_message = "Invalide email ou mots de passe.";
+        $error = "Veuillez remplir tous les champs !";
     }
 }
 ?>
@@ -34,6 +42,9 @@ if (isset($_POST['submit_user'])){
                 </div>
                 <div class="card-content">
                     <form action="" method="POST" id="loginForm">
+                    <?php if (!empty($error)): ?>
+                        <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                    <?php endif; ?>
                         <div class="input-group">
                             <label for="email">Email</label>
                             <div class="input-icon">
@@ -46,10 +57,9 @@ if (isset($_POST['submit_user'])){
                             <div class="input-icon">
                                 <input type="password" id="password" name="password" placeholder="******" required>
                                 <span class="icon">🔒</span>
-                                <span class="toggle-password">👁️</span> 
+                                <span class="toggle-password">🙈</span> 
                             </div>
                         </div>
-                        <?php if (isset($error_message)) { echo "<p class='error-message'>$error_message</p>"; } ?>
                         <button type="submit" id="registerBtn" name="submit_user">Se connecter</button>
                     </form>
                 </div>
