@@ -88,6 +88,17 @@ function getAnimals($cnx)
         return false;
     }
 }
+
+getUsers($cnx){
+    $req = "SELECT * from utilisateur";
+    $res = $cnx->query($req);
+    $animaux = $res->fetchAll();
+    if(count($animaux) > 0) {
+        return $animaux;
+    } else {
+        return false;
+    }
+}
 function getAnimalByCategorie($cnx, $categorie)
 {
     $req = "SELECT * FROM animaux WHERE categorie = :categorie";
