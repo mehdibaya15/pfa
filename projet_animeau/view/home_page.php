@@ -1,9 +1,9 @@
-<?php
-include("../config/database.php");
-include("../controller/traitement.php");
-?>
 <!DOCTYPE html>
 <html lang="fr">
+<?php
+include("../controller/traitement.php");
+include("../config/database.php");
+?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,7 @@ include("../controller/traitement.php");
     </script>
 
     <!-- Navbar  -->
-    <?php include("header.php");?>
+<?php include("header.php");?>
 
     <!-- Hero Section -->
     <section class="hero-section">
@@ -102,23 +102,23 @@ include("../controller/traitement.php");
     <h2 class="Image-title">Nos animaux</h2>
     <div class="img-flex-container">
         <div class="Image-container">
-            <img src="https://images.unsplash.com/photo-1563538484631-e3a974e4263f?q=80&w=1578&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            <img src="https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2hhdHxlbnwwfHwwfHx8MA%3D%3D"
                 alt="">
-            <img src="https://images.unsplash.com/photo-1683463170490-e6727ad94d09?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            <img src="https://images.unsplash.com/photo-1557431177-d277c24390e5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fHw%3D"
                 alt="">
-            <img src="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bGFwaW58ZW58MHx8MHx8fDA%3D"
+            <img src="https://images.unsplash.com/photo-1588942173353-0c53a1bf9081?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW91dG9ufGVufDB8fDB8fHww"
                 alt="">
-            <img src="https://images.unsplash.com/photo-1654181925544-4b9f45943cc4?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q2FuYXJpfGVufDB8fDB8fHww"
+            <img src="https://images.unsplash.com/photo-1605559911160-a3d95d213904?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9ua2V5fGVufDB8fDB8fHww"
                 alt="">
         </div>
         <div class="Image-container-2">
-        <img src="https://images.unsplash.com/photo-1563538484631-e3a974e4263f?q=80&w=1578&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            <img src="https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2hhdHxlbnwwfHwwfHx8MA%3D%3D"
                 alt="">
-            <img src="https://images.unsplash.com/photo-1683463170490-e6727ad94d09?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            <img src="https://images.unsplash.com/photo-1557431177-d277c24390e5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fHw%3D"
                 alt="">
-            <img src="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bGFwaW58ZW58MHx8MHx8fDA%3D"
+            <img src="https://images.unsplash.com/photo-1588942173353-0c53a1bf9081?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bW91dG9ufGVufDB8fDB8fHww"
                 alt="">
-            <img src="https://images.unsplash.com/photo-1654181925544-4b9f45943cc4?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q2FuYXJpfGVufDB8fDB8fHww"
+            <img src="https://images.unsplash.com/photo-1605559911160-a3d95d213904?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bW9ua2V5fGVufDB8fDB8fHww"
                 alt="">
         </div>
     </div>

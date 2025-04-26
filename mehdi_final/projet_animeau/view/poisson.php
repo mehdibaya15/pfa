@@ -1,84 +1,74 @@
 <?php
 include("../controller/traitement.php");
 include("../config/database.php");
-$animaux = [];
-$itemsPerPage = 6;
-$currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$offset = ($currentPage - 1) * $itemsPerPage;
+$categorie = "poisson";
 
-try {
-    if (isset($_GET['search1']) && !empty($_GET['search1'])) {
-        $allAnimaux = rechercheAnimalIndexee($cnx, $_GET['search1']) ?? [];
-        if (!empty($allAnimaux)) {
-            usort($allAnimaux, function($a, $b) {
-                return ($b['score'] ?? 0) <=> ($a['score'] ?? 0);
-            });
-        }
-    } else {
-        $allAnimaux = insertAnimals($cnx) ?? [];
-    }
-    
-    // Tri des animaux AVANT la pagination si un paramètre de tri est présent
-    if (!empty($allAnimaux) && isset($_GET['sort'])) {
-        $sort = $_GET['sort'];
-        usort($allAnimaux, function ($a, $b) use ($sort) {
-            switch ($sort) {
-                case 'age':
-                    return ($a['age'] ?? 0) <=> ($b['age'] ?? 0);
-                case 'localisation':
-                    return strcmp($a['ville'] ?? '', $b['ville'] ?? '');
-                case 'race':
-                    return strcmp($a['race'] ?? '', $b['race'] ?? '');
-                default:
-                    return 0;
-            }
-        });
-    }
-    
-    // Get total count for pagination
-    $totalAnimaux = count($allAnimaux);
-    $totalPages = ceil($totalAnimaux / $itemsPerPage);
-    
-    // Apply pagination
-    $animaux = array_slice($allAnimaux, $offset, $itemsPerPage);
-    
-} catch (Exception $e) {
-    error_log("Erreur lors de la récupération des animaux: " . $e->getMessage());
-    $animaux = [];
-    $totalAnimaux = 0;
-    $totalPages = 1;
+// Configuration de la pagination
+$itemsPerPage = 6;
+$currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1; 
+$offset = ($currentPage - 1) * $itemsPerPage; 
+
+// Récupération des paramètres
+$search = $_GET['search1'] ?? '';
+$sort = $_GET['sort'] ?? '';
+
+if (!empty($search)) {
+    $allAnimaux = rechercheAnimalCat($cnx, $search, $categorie);
+} else {
+    $allAnimaux = insertAnimalByCategorie($cnx, $categorie);
 }
+
+// Tri des animaux si paramètre de tri présent
+if (!empty($allAnimaux) && !empty($sort)) {
+    usort($allAnimaux, function ($a, $b) use ($sort) {
+        switch ($sort) {
+            case 'age':
+                return ($a['age'] ?? 0) <=> ($b['age'] ?? 0);
+            case 'localisation':
+                return strcmp($a['ville'] ?? '', $b['ville'] ?? '');
+            case 'race':
+                return strcmp($a['race'] ?? '', $b['race'] ?? '');
+            default:
+                return 0;
+        }
+    });
+}
+
+// Calcul du nombre total d'animaux et de pages
+$totalAnimaux = count($allAnimaux ?? []);
+$totalPages = ceil($totalAnimaux / $itemsPerPage);
+$animaux = array_slice($allAnimaux ?? [], $offset, $itemsPerPage);
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boutique</title>
+    <title>Poissons</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style_home.css">
     <link rel="stylesheet" href="magasin.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
-    <script src="magasinprep.js"></script>
 </head>
 
 <body>
-    <?php include("header.php"); ?>
+    <!-- Navbar -->
+    <?php include("header.php");?>
 
     <div class="main-content">
         <div class="container">
             <div class="filters-container">
                 <div class="filters-section">
                     <div class="animal-types">
-                        <a href="magasin.php" class="animal-type-btn active">Tous</a>
+                        <a href="magasin.php" class="animal-type-btn">Tous</a>
                         <a href="chien.php" class="animal-type-btn">Chien</a>
-                        <a href="chat.php" class="animal-type-btn">Chat</a>
+                        <a href="chat.php" class="animal-type-btn ">Chat</a>
                         <a href="hamster.php" class="animal-type-btn">Hamster</a>
                         <a href="oiseaux.php" class="animal-type-btn">Oiseaux</a>
-                        <a href="poisson.php" class="animal-type-btn">Poisson</a>
+                        <a href="poisson.php" class="animal-type-btn active">Poisson</a>
                         <a href="lapin.php" class="animal-type-btn">Lapin</a>
                         <a href="singe.php" class="animal-type-btn">Singe</a>
                     </div>
@@ -87,9 +77,9 @@ try {
                         <form method="GET" action="">
                             <div class="search-box">
                                 <input type="text" class="form-control" placeholder="Rechercher un animal..." 
-                                       name="search1" value="<?= htmlspecialchars($_GET['search1'] ?? '') ?>">
-                                <?php if (isset($_GET['sort'])): ?>
-                                    <input type="hidden" name="sort" value="<?= htmlspecialchars($_GET['sort']) ?>">
+                                       name="search1" value="<?= htmlspecialchars($search) ?>">
+                                <?php if (!empty($sort)): ?>
+                                    <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
                                 <?php endif; ?>
                                 <button class="btn btn-outline-secondary" type="submit">
                                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -98,15 +88,15 @@ try {
                         </form>
                         <div class="sort-options">
                             <span>Trier par :</span>
-                            <form method="GET" action="" id="sort-form">
-                                <?php if (isset($_GET['search1']) && !empty($_GET['search1'])): ?>
-                                    <input type="hidden" name="search1" value="<?= htmlspecialchars($_GET['search1']) ?>">
+                            <form method="GET" action="">
+                                <?php if (!empty($search)): ?>
+                                    <input type="hidden" name="search1" value="<?= htmlspecialchars($search) ?>">
                                 <?php endif; ?>
-                                <select name="sort" id="sort-select" onchange="this.form.submit()">
+                                <select name="sort" class="form-select" onchange="this.form.submit()">
                                     <option value="">-- Sélectionner --</option>
-                                    <option value="race" <?= (isset($_GET['sort']) && $_GET['sort'] === 'race' ? 'selected' : '' )?>>Race</option>
-                                    <option value="age" <?= (isset($_GET['sort']) && $_GET['sort'] === 'age' ? 'selected' : '' )?>>Age</option>
-                                    <option value="localisation" <?= (isset($_GET['sort']) && $_GET['sort'] === 'localisation' ? 'selected' : '' )?>>Localisation</option>
+                                    <option value="race" <?= $sort === 'race' ? 'selected' : '' ?>>Race</option>
+                                    <option value="age" <?= $sort === 'age' ? 'selected' : '' ?>>Age</option>
+                                    <option value="localisation" <?= $sort === 'localisation' ? 'selected' : '' ?>>Localisation</option>
                                 </select>
                             </form>
                         </div>
@@ -116,36 +106,33 @@ try {
             
             <div class="animals-listing">
                 <div class="container">
-                    <?php if (isset($_GET['search1']) && !empty($_GET['search1'])): ?>
+                    <?php if (!empty($search)): ?>
                         <div class="alert alert-info mb-3">
-                            <?= $totalAnimaux ?> résultat(s) trouvé(s) pour "<?= htmlspecialchars($_GET['search1']) ?>"
+                            <?= $totalAnimaux ?> résultat(s) trouvé(s) pour "<?= htmlspecialchars($search) ?>"
                         </div>
                     <?php endif; ?>
-    
+                    
                     <div class="row">
-                        <?php if (!empty($animaux)): ?>
-                            <?php foreach ($animaux as $animal): ?>
-                                <?php if (is_array($animal)): ?>
-                                    <div class="col-lg-4 col-md-6 mb-4">
-                                        <div class="card animal-card"> 
-                                            <img src="<?= htmlspecialchars($animal['image_url'] ?? '') ?>" class="card-img-top" alt="<?= htmlspecialchars($animal['race'] ?? '') ?>">
-                                            <div class="card-body">
-                                                <h5 class="card-title">
-                                                    <?= htmlspecialchars($animal['nom'] ?? '') ?> - <?= htmlspecialchars($animal['race'] ?? '') ?>
-                                                </h5>
-                                                <p class="card-text"><?= htmlspecialchars($animal['description'] ?? '') ?></p>
-                                                <div class="animal-details">
-                                                    <span><i class="fas fa-venus-mars"></i> <?= ($animal['sexe'] ?? '') === 'F' ? 'Femelle' : 'Mâle' ?></span>
-                                                    <span><i class="fas fa-birthday-cake"></i> <?= htmlspecialchars($animal['age'] ?? '') ?> an(s)</span>
-                                                    <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($animal['ville'] ?? '') ?></span>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                                    <a href="adaptationInfo.php?id=<?= $animal['id_animal'] ?? '' ?>" class="btn btn-adopt">Adopter</a>
-                                                </div>
+                        <?php if (!empty($animaux)): ?>   
+                            <?php foreach ($animaux as $animal): ?>  
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <div class="card animal-card">
+                                        <div class="animal-badge"></div>
+                                        <img src="<?= htmlspecialchars($animal['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($animal['race']) ?>">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?= htmlspecialchars($animal['nom']) ?> - <?= htmlspecialchars($animal['race']) ?></h5>
+                                            <p class="card-text"><?= htmlspecialchars($animal['description']) ?></p>
+                                            <div class="animal-details">
+                                                <span><i class="fas fa-venus-mars"></i> <?= $animal['sexe'] === 'F' ? 'Femelle' : 'Mâle' ?></span>
+                                                <span><i class="fas fa-birthday-cake"></i> <?= htmlspecialchars($animal['age']) ?> an(s)</span>
+                                                <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($animal['ville']) ?></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <a href="adaptationInfo.php?id=<?= $animal['id'] ?? '' ?>" class="btn btn-adopt">Adopter</a>
                                             </div>
                                         </div>
                                     </div>
-                                <?php endif; ?>
+                                </div>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <div class="col-12">
@@ -159,7 +146,11 @@ try {
                             <ul class="pagination justify-content-center">
                                 <li class="page-item <?= $currentPage == 1 ? 'disabled' : '' ?>">
                                     <a class="page-link" href="?<?= 
-                                        http_build_query(array_merge($_GET, ['page' => $currentPage - 1])) 
+                                        http_build_query(array_filter([
+                                            'search1' => $search,
+                                            'sort' => $sort,
+                                            'page' => $currentPage - 1
+                                        ])) 
                                     ?>" aria-label="Précédent">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
@@ -178,7 +169,11 @@ try {
                                 // Première page + ... si nécessaire
                                 if ($startPage > 1) {
                                     echo '<li class="page-item"><a class="page-link" href="?' . 
-                                         http_build_query(array_merge($_GET, ['page' => 1])) . '">1</a></li>';
+                                         http_build_query(array_filter([
+                                             'search1' => $search,
+                                             'sort' => $sort,
+                                             'page' => 1
+                                         ])) . '">1</a></li>';
                                     if ($startPage > 2) {
                                         echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                                     }
@@ -188,7 +183,11 @@ try {
                                 for ($i = $startPage; $i <= $endPage; $i++) {
                                     echo '<li class="page-item ' . ($i == $currentPage ? 'active' : '') . '">';
                                     echo '<a class="page-link" href="?' . 
-                                         http_build_query(array_merge($_GET, ['page' => $i])) . '">' . $i . '</a>';
+                                         http_build_query(array_filter([
+                                             'search1' => $search,
+                                             'sort' => $sort,
+                                             'page' => $i
+                                         ])) . '">' . $i . '</a>';
                                     echo '</li>';
                                 }
                                 
@@ -198,13 +197,21 @@ try {
                                         echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                                     }
                                     echo '<li class="page-item"><a class="page-link" href="?' . 
-                                         http_build_query(array_merge($_GET, ['page' => $totalPages])) . '">' . $totalPages . '</a></li>';
+                                         http_build_query(array_filter([
+                                             'search1' => $search,
+                                             'sort' => $sort,
+                                             'page' => $totalPages
+                                         ])) . '">' . $totalPages . '</a></li>';
                                 }
                                 ?>
                                 
                                 <li class="page-item <?= $currentPage == $totalPages ? 'disabled' : '' ?>">
                                     <a class="page-link" href="?<?= 
-                                        http_build_query(array_merge($_GET, ['page' => $currentPage + 1])) 
+                                        http_build_query(array_filter([
+                                            'search1' => $search,
+                                            'sort' => $sort,
+                                            'page' => $currentPage + 1
+                                        ])) 
                                     ?>" aria-label="Suivant">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
