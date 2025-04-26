@@ -241,4 +241,16 @@ function cosineSimilarity(array $vecA, array $vecB): float {
     
     return $normA > 0 && $normB > 0 ? $dotProduct / (sqrt($normA) * sqrt($normB)) : 0;
 }
+function getAvis($cnx){
+    $req = "SELECT * FROM avis ";
+    $stmt = $cnx->prepare($req);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+function getCommentaire($cnx): mixed{
+    $req = "SELECT * FROM contact ";
+    $stmt = $cnx->prepare($req);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
 ?>
