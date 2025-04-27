@@ -23,6 +23,8 @@ function AjouterAvis($cnx,$data){
         return false;
     }
 }
+
+
 function AjouterUtilisateur($cnx, $data) {
     $mdpHash = md5($data['password']);
     $req = "INSERT INTO utilisateur(nom, prenom, email, telephone,adresse,password) VALUES ('".$data['nom']."', '".$data['prenom']."', '".$data['email']."','".$data['telephone']."','".$data['adresse']."', '".$mdpHash."')";
@@ -240,5 +242,33 @@ function cosineSimilarity(array $vecA, array $vecB): float {
     }
     
     return $normA > 0 && $normB > 0 ? $dotProduct / (sqrt($normA) * sqrt($normB)) : 0;
+}
+function getAvis($cnx){
+    $req = "SELECT * FROM avis ";
+    $stmt = $cnx->prepare($req);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+function getCommentaire($cnx): mixed{
+    $req = "SELECT * FROM contact ";
+    $stmt = $cnx->prepare($req);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+function getUsers($cnx): mixed{
+    $req = "SELECT * FROM utilisateur ";
+    $stmt = $cnx->prepare($req);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+function getAdoptionRequests($cnx){
+    $req = "SELECT * from demande";
+    $res = $cnx->query($req);
+    $demandes = $res->fetchAll();
+    if(count($demandes) > 0) {
+        return $demandes;
+    } else {
+        return false;
+    }
 }
 ?>

@@ -19,9 +19,28 @@ if (!empty($_POST)) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style_home.css">
+    <style>
+        .contact-info {
+            width: 30%;
+        }
+        .flex {
+            display: flex;
+            width: 100%;
+            margin-top: 100px;
+            gap: 16px;
+            height: 100%;
+
+        }
+        .contact-form {
+            width: 70%;
+            height: 620px;
+        }
+    </style>
 </head>
 <body>
 <?php include("header.php");?>
+
+<div class="container flex">
     <div class="contact-info">
         <div class="info-block">
             <h2>APPELEZ-NOUS</h2>
@@ -41,7 +60,6 @@ if (!empty($_POST)) {
         </div>
     </div>
     
-    <div class="separator"></div>
     
     <div class="contact-form">
         <h2>Contactez Nous</h2>
@@ -65,6 +83,8 @@ if (!empty($_POST)) {
             <button type="submit" name="submit_contact" class="submit-btn">SOUMETRE</button>
         </form>
     </div>
+    </div>
+
     <section class="join-section">
         <div class="container">
             <div>

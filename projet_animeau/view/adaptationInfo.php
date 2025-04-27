@@ -1,31 +1,81 @@
-
 <?php
+session_start();
 include("../config/database.php");
-include("../controller/traitement.php");
 
 // Create connection
-echo "<script>console.log('log: " . $_POST['gender'] . "');</script>";
+if (isset($_GET["id"])) {
+    $id = $_GET["id"];
+}
+;
 
-    if (isset($_GET["id"])) {
-        $id = $_GET["id"];
-    };
 
- 
+if (!isset($_SESSION['email'])) {
+    die("<div class='alert alert-danger'>Error: Vous devez être connecté pour accéder à cette page.</div>");
+}
+
+
 
 if (!empty($_POST)) {
+
+    if (isset($_POST['gender'], $_POST['prenom'], $_POST['nom'])) {
+
+
+        try {
+
+            $gender = $_POST['gender'];
+            $prenom = $_POST['prenom'];
+            $nom = $_POST['nom'];
+            $email = $_SESSION['email'];
+            $postal = $_POST['codepostal'];
+            $ville = $_POST['ville'];
+            $tel = $_POST['telephone'];
+            $motivation = $_POST['motivation'];
+
+            $traitOptions = ['calme', 'casanier', 'dynamique', 'aventurier', 'sportif', 'urbain', 'nature'];
+            $traits = [];
+            foreach ($traitOptions as $trait) {
+                if (!empty($_POST[$trait])) {
+                    $traits[] = $trait;
+                }
+            }
+            $family = implode(', ', $traits);
+
+            echo "<script>console.log('test: " . json_encode($family) . "');</script>";
+            echo "<script>console.log('test 2: " . json_encode($traits) . "');</script>";
+
+
+
+            $enfant = isset($_POST['enfants']) && $_POST['enfants'] === 'oui' ? 1 : 0;
+
+            $req = "INSERT INTO demande (gender, prenom, nom, email, postal, ville, telephone, motivation, family, enfant, id_animal)
+                VALUES 
+            ('$gender', '$prenom', '$nom', '$email', '$postal', '$ville', '$tel', '$motivation', '$family', '$enfant', '$id')";
+
+            $res = $cnx->query($req);
+
+            if ($res) {
+                $req = "UPDATE animaux set adopter = true WHERE id_animal = $id";
+                $res = $cnx->query($req);
+                if ($res) {
+                    header("Location: demandeEnvoyer.html");
+                    exit();
+                }
+            } else {
+                echo "Erreur : ";
+            }
+        } catch (PDOException $e) {
+            echo "<script>console.error('Database Error: " . $e->getMessage() . "');</script>";
+            // Or display to user:
+            echo "<div class='alert alert-danger'>Error: " . $e->getMessage() . "</div>";
+        }
     
-
-    if (isset($_POST['gender'], $_POST['prenom'], $_POST['nom'], $id)) {
-    echo "". $id ."";
-
-
-        AjouterDemande(cnx: $cnx, data: $_POST, id: $id );
     }
 }
 
 ?>
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,7 +251,8 @@ if (!empty($_POST)) {
 
         <div class="header">
             <h1>VOTRE PROFIL <span class="highlight">ADOPTANT</span></h1>
-            <p class="intro-text">Merci pour votre volonté d'adopter un de nos pensionnaires !<br>Veuillez remplir le formulaire ci-dessous.</p>
+            <p class="intro-text">Merci pour votre volonté d'adopter un de nos pensionnaires !<br>Veuillez remplir le
+                formulaire ci-dessous.</p>
         </div>
 
         <form method="POST" action="">
@@ -224,11 +275,6 @@ if (!empty($_POST)) {
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label for="email" class="form-label required-field">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label for="codepostal" class="form-label required-field">Code postal</label>
@@ -248,7 +294,8 @@ if (!empty($_POST)) {
             <h2><i class="bi bi-heart-fill"></i> VOTRE EXPÉRIENCE ET VOS MOTIVATIONS</h2>
 
             <div class="mb-3">
-                <label for="motivation" class="form-label required-field">Pourquoi souhaitez-vous adopter un animal ?</label>
+                <label for="motivation" class="form-label required-field">Pourquoi souhaitez-vous adopter un animal
+                    ?</label>
                 <textarea class="form-control" id="motivation" name="motivation" required></textarea>
             </div>
 
@@ -258,31 +305,45 @@ if (!empty($_POST)) {
                 <label class="form-label">Décrivez-nous un peu votre caractère et votre mode de vie :</label>
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="calme" name="calme"><label class="form-check-label" for="calme">Calme</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="casanier" name="casanier"><label class="form-check-label" for="casanier">Casanier</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="dynamique" name="dynamique"><label class="form-check-label" for="dynamique">Dynamique</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="aventurier" name="aventurier"><label class="form-check-label" for="aventurier">Aventurier</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="calme"
+                                name="calme"><label class="form-check-label" for="calme">Calme</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="casanier"
+                                name="casanier"><label class="form-check-label" for="casanier">Casanier</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="dynamique"
+                                name="dynamique"><label class="form-check-label" for="dynamique">Dynamique</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="aventurier"
+                                name="aventurier"><label class="form-check-label" for="aventurier">Aventurier</label>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="sportif" name="sportif"><label class="form-check-label" for="sportif">Sportif</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="urbain" name="urbain"><label class="form-check-label" for="urbain">Urbain</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="nature" name="nature"><label class="form-check-label" for="nature">Amoureux de la nature</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="sportif"
+                                name="sportif"><label class="form-check-label" for="sportif">Sportif</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="urbain"
+                                name="urbain"><label class="form-check-label" for="urbain">Urbain</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="nature"
+                                name="nature"><label class="form-check-label" for="nature">Amoureux de la nature</label>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="mb-3 radio-group">
                 <label class="form-label required-field">Avez-vous des enfants ?</label>
-                <div class="form-check"><input class="form-check-input" type="radio" name="enfants" value="oui" id="enfants-oui"><label class="form-check-label" for="enfants-oui">Oui</label></div>
-                <div class="form-check"><input class="form-check-input" type="radio" name="enfants" value="non" id="enfants-non"><label class="form-check-label" for="enfants-non">Non</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="enfants" value="oui"
+                        id="enfants-oui"><label class="form-check-label" for="enfants-oui">Oui</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="enfants" value="non"
+                        id="enfants-non"><label class="form-check-label" for="enfants-non">Non</label></div>
             </div>
 
             <p class="legal-text">* Champs obligatoires</p>
-            <p class="legal-text">Je comprends et j'accepte que les données personnelles indiquées dans ce formulaire soient transmises à la SPA dans le cadre du traitement de ma démarche d'adoption.</p>
+            <p class="legal-text">Je comprends et j'accepte que les données personnelles indiquées dans ce formulaire
+                soient transmises à la SPA dans le cadre du traitement de ma démarche d'adoption.</p>
 
             <div class="btn-group">
-                <button type="reset" class="btn btn-outline flex-grow-1"><i class="bi bi-arrow-counterclockwise"></i> Recommencer</button>
-                <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-arrow-right"></i> Suivant</button>
+                <button type="reset" class="btn btn-outline flex-grow-1"><i class="bi bi-arrow-counterclockwise"></i>
+                    Recommencer</button>
+                <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-arrow-right"></i>
+                    Suivant</button>
             </div>
         </form>
     </div>

@@ -1,7 +1,14 @@
 <?php
 session_start();
+
+if (isset($_SESSION['email'])) {
+    header('Location: user_profile.php');
+    exit();
+}
+
 include("../config/database.php");
 include("../controller/traitement.php");
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'];
     $prenom = $_POST['prenom'];
@@ -20,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['email'] = $user['email'];
         $_SESSION['nom'] = $user['nom'];
         $_SESSION['prenom'] = $user['prenom'];
-        redirect('./home_page.php'); // Assurez-vous que cette fonction fonctionne
+        redirect('./home_page.php'); 
         exit();
         } 
         else {
@@ -79,14 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="telephone">Téléphone</label>
                             <div class="input-icon">
                                 <input type="text" id="telephone" name="telephone" placeholder="+216 ** *** ***" required>
-                                <span class="icon"></span>
+                                <span class="icon">☎️</span>
                             </div>
                         </div>
                         <div class="input-group">
                             <label for="adresse">Adresse</label>
                             <div class="input-icon">
                                 <input type="text" id="adresse" name="adresse" placeholder="votre adresse" required>
-                                <span class="icon"></span>
+                                <span class="icon">🏠</span>
                             </div>
                         </div>
                         <div class="input-group">
@@ -98,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </div>
                         <?php if (isset($error_message)) { echo "<p class='error-message'>$error_message</p>"; } ?>
-                        <button type="submit" id="registerBtn" name="submit_user">Register</button>
+                        <button type="submit" id="registerBtn" name="submit_user">Enregistrer</button>
                     </form>
                 </div>
                 <div class="card-footer">

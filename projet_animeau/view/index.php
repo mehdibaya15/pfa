@@ -1,7 +1,12 @@
 <?php
+session_start();
+if (isset($_SESSION['email'])) { // Vérification AVANT session_start()
+    header('Location: user_profile.php');
+    exit();
+}
 include("../controller/traitement.php");
 include("../config/database.php");
-session_start();
+
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
@@ -22,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>

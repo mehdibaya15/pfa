@@ -46,17 +46,27 @@ if (isset($_POST["update-animal"]) && isset($_GET['id'])) {
     ]);
 
     if ($success) {
-        echo "<script>alert('Animal updated successfully.'); window.location.href='admin.php';</script>";
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+                
+                document.getElementById('successContinueBtn').addEventListener('click', function() {
+                    window.location.href = 'admin.php';
+                });
+            });
+        </script>";
     } else {
-        echo "<script>alert('Error updating animal.');</script>";
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            });
+        </script>";
     }
 }
-
-
-
-
-
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -239,11 +249,8 @@ if (isset($_POST["update-animal"]) && isset($_GET['id'])) {
                 formulaire ci-dessous.</p>
         </div>
 
-        <form method="POST" action="">
-
-
+        <form method="POST" action="" id="updateForm">
             <div class="row">
-
                 <div class="col-md-6 mb-3">
                     <label for="nom" class="form-label required-field">Nom</label>
                     <input type="text" class="form-control" id="nom" name="nom" value="<?php echo $res["nom"] ?>"
@@ -271,7 +278,6 @@ if (isset($_POST["update-animal"]) && isset($_GET['id'])) {
                         <option value="F" <?php echo (isset($res["sexe"]) && $res["sexe"] == "F") ? "selected" : ""; ?>>F
                         </option>
                     </select>
-
                 </div>
                 <div class="col-md-8 mb-3">
                     <label for="ville" class="form-label required-field">Ville</label>
@@ -286,7 +292,6 @@ if (isset($_POST["update-animal"]) && isset($_GET['id'])) {
                     value="<?php echo $res["description"] ?>" required>
             </div>
 
-
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label for="age" class="form-label required-field">Age</label>
@@ -298,7 +303,6 @@ if (isset($_POST["update-animal"]) && isset($_GET['id'])) {
                 </div>
             </div>
 
-
             <p class="legal-text">* Champs obligatoires</p>
             <p class="legal-text">Je comprends et j'accepte que les données personnelles indiquées dans ce formulaire
                 soient transmises à la SPA dans le cadre du traitement de ma démarche d'adoption.</p>
@@ -306,10 +310,66 @@ if (isset($_POST["update-animal"]) && isset($_GET['id'])) {
             <div class="btn-group">
                 <button type="reset" class="btn btn-outline flex-grow-1"><i class="bi bi-arrow-counterclockwise"></i>
                     Recommencer</button>
-                <button type="submit" name="update-animal" class="btn btn-primary flex-grow-1"><i class="bi bi-arrow-right"></i>
-                    Suivant</button>
+                <button type="button" class="btn btn-primary flex-grow-1" data-bs-toggle="modal" data-bs-target="#confirmUpdateModal">
+                    <i class="bi bi-arrow-right"></i> Suivant
+                </button>
             </div>
         </form>
+    </div>
+
+    <!-- Confirmation Update Modal -->
+    <div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="confirmUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmUpdateModalLabel">Confirmer la mise à jour</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Êtes-vous sûr de vouloir mettre à jour les informations de cet animal ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" name="update-animal" class="btn btn-primary" form="updateForm">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Succès</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Animal mis à jour avec succès!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="successContinueBtn" class="btn btn-primary">Continuer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Erreur</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Une erreur s'est produite lors de la mise à jour de l'animal.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

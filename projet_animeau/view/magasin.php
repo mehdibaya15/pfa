@@ -3,25 +3,24 @@ include("../controller/traitement.php");
 include("../config/database.php");
 $animaux = [];
 $itemsPerPage = 6;
-$currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$currentPage = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $offset = ($currentPage - 1) * $itemsPerPage;
 
 try {
     if (isset($_GET['search1']) && !empty($_GET['search1'])) {
-        $allAnimaux = rechercheAnimalIndexee($cnx, $_GET['search1']) ?? [];
-        if (!empty($allAnimaux)) {
-            usort($allAnimaux, function($a, $b) {
+        $animaux = rechercheAnimalIndexee($cnx, $_GET['search1']) ?? [];
+        if (!empty($animaux)) {
+            usort($animaux, function ($a, $b) {
                 return ($b['score'] ?? 0) <=> ($a['score'] ?? 0);
             });
         }
     } else {
-        $allAnimaux = insertAnimals($cnx) ?? [];
+        $animaux = insertAnimals($cnx) ?? [];
     }
-    
     // Tri des animaux AVANT la pagination si un paramètre de tri est présent
-    if (!empty($allAnimaux) && isset($_GET['sort'])) {
+    if (!empty($animaux) && isset($_GET['sort'])) {
         $sort = $_GET['sort'];
-        usort($allAnimaux, function ($a, $b) use ($sort) {
+        usort($animaux, function ($a, $b) use ($sort) {
             switch ($sort) {
                 case 'age':
                     return ($a['age'] ?? 0) <=> ($b['age'] ?? 0);
@@ -34,14 +33,11 @@ try {
             }
         });
     }
-    
     // Get total count for pagination
-    $totalAnimaux = count($allAnimaux);
+    $totalAnimaux = count($animaux);
     $totalPages = ceil($totalAnimaux / $itemsPerPage);
-    
     // Apply pagination
-    $animaux = array_slice($allAnimaux, $offset, $itemsPerPage);
-    
+    $animaux = array_slice($animaux, $offset, $itemsPerPage);
 } catch (Exception $e) {
     error_log("Erreur lors de la récupération des animaux: " . $e->getMessage());
     $animaux = [];
@@ -63,6 +59,94 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
     <script src="magasinprep.js"></script>
+    <style>
+        /* Custom styles for adoption buttons */
+        .btn-adopt {
+            background-color: #5F6F52;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-adopt:not(.disabled) {
+            background-color: #5F6F52;
+        }
+
+        .btn-adopt:not(.disabled):hover {
+            background-color: #4a5a3d;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-adopt.disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+            opacity: 1;
+            box-shadow: none;
+            transform: none;
+            border: 1px solid #d0d0d0;
+        }
+
+        .btn-primary:disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+            border-color: #d0d0d0;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+        /* Adopted badge style */
+        .adopted-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .adopted-badge i {
+            font-size: 1rem;
+        }
+
+        /* Card styling */
+        .animal-card {
+            position: relative;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .animal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .animal-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .animal-details span {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+    </style>
 </head>
 
 <body>
@@ -82,7 +166,7 @@ try {
                         <a href="lapin.php" class="animal-type-btn">Lapin</a>
                         <a href="singe.php" class="animal-type-btn">Singe</a>
                     </div>
-                    
+
                     <div class="search-sort-row">
                         <form method="GET" action="">
                             <div class="search-box">
@@ -113,7 +197,7 @@ try {
                     </div>
                 </div>
             </div>
-            
+
             <div class="animals-listing">
                 <div class="container">
                     <?php if (isset($_GET['search1']) && !empty($_GET['search1'])): ?>
@@ -121,26 +205,50 @@ try {
                             <?= $totalAnimaux ?> résultat(s) trouvé(s) pour "<?= htmlspecialchars($_GET['search1']) ?>"
                         </div>
                     <?php endif; ?>
-    
+
                     <div class="row">
                         <?php if (!empty($animaux)): ?>
                             <?php foreach ($animaux as $animal): ?>
                                 <?php if (is_array($animal)): ?>
                                     <div class="col-lg-4 col-md-6 mb-4">
-                                        <div class="card animal-card"> 
-                                            <img src="<?= htmlspecialchars($animal['image_url'] ?? '') ?>" class="card-img-top" alt="<?= htmlspecialchars($animal['race'] ?? '') ?>">
+                                        <div class="card animal-card">
+                                            <img src="<?= htmlspecialchars($animal['image_url'] ?? '') ?>" class="card-img-top"
+                                                alt="<?= htmlspecialchars($animal['race'] ?? '') ?>">
+                                            <?php if (($animal['adopter'] ?? '') == 1): ?>
+                                                <div class="adopted-badge">
+                                                    <i class="fas fa-check-circle"></i> Adopté
+                                                </div>
+                                            <?php endif; ?>
                                             <div class="card-body">
                                                 <h5 class="card-title">
-                                                    <?= htmlspecialchars($animal['nom'] ?? '') ?> - <?= htmlspecialchars($animal['race'] ?? '') ?>
+                                                    <?= htmlspecialchars($animal['nom'] ?? '') ?> -
+                                                    <?= htmlspecialchars($animal['race'] ?? '') ?>
                                                 </h5>
                                                 <p class="card-text"><?= htmlspecialchars($animal['description'] ?? '') ?></p>
                                                 <div class="animal-details">
-                                                    <span><i class="fas fa-venus-mars"></i> <?= ($animal['sexe'] ?? '') === 'F' ? 'Femelle' : 'Mâle' ?></span>
-                                                    <span><i class="fas fa-birthday-cake"></i> <?= htmlspecialchars($animal['age'] ?? '') ?> an(s)</span>
-                                                    <span><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($animal['ville'] ?? '') ?></span>
+                                                    <span><i class="fas fa-venus-mars"></i>
+                                                        <?= ($animal['sexe'] ?? '') === 'F' ? 'Femelle' : 'Mâle' ?></span>
+                                                    <span><i class="fas fa-birthday-cake"></i>
+                                                        <?= htmlspecialchars($animal['age'] ?? '') ?> an(s)</span>
+                                                    <span><i class="fas fa-map-marker-alt"></i>
+                                                        <?= htmlspecialchars($animal['ville'] ?? '') ?></span>
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center mt-3">
-                                                    <a href="adaptationInfo.php?id=<?= $animal['id_animal'] ?? '' ?>" class="btn btn-adopt">Adopter</a>
+                                                    <?php if (isset($_SESSION['email'])): ?>
+                                                        <a href="adaptationInfo.php?id=<?= $animal['id_animal'] ?? '' ?>"
+                                                           class="btn btn-adopt <?= ($animal['adopter'] ?? '') == 1 ? 'hidden' : '' ?>"
+                                                           <?= ($animal['adopter'] ?? '') == 1 ? 'aria-disabled="true" tabindex="-1"' : '' ?>>
+                                                            <?= ($animal['adopter'] ?? '') == 1 ? 'Déjà adopté' : 'Adopter' ?>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-primary" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#loginRequiredModal"
+                                                                <?= ($animal['adopter'] ?? '') == 1 ? 'hidden' : '' ?>
+                                                                >
+                                                            <?= ($animal['adopter'] ?? '') == 1 ? 'Déjà adopté' : 'Adopter' ?>
+                                                        </button>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -153,65 +261,84 @@ try {
                             </div>
                         <?php endif; ?>
                     </div>
-                    
+
                     <?php if ($totalPages > 1): ?>
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center">
                                 <li class="page-item <?= $currentPage == 1 ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="?<?= 
-                                        http_build_query(array_merge($_GET, ['page' => $currentPage - 1])) 
-                                    ?>" aria-label="Précédent">
+                                    <a class="page-link" href="?<?=
+                                        http_build_query(array_merge($_GET, ['page' => $currentPage - 1]))
+                                        ?>" aria-label="Précédent">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
-                                
+
                                 <?php
                                 // Afficher maximum 5 pages autour de la page courante
                                 $startPage = max(1, $currentPage - 2);
                                 $endPage = min($totalPages, $startPage + 4);
-                                
+
                                 // Ajuster si on est proche de la fin
                                 if ($endPage - $startPage < 4) {
                                     $startPage = max(1, $endPage - 4);
                                 }
-                                
+
                                 // Première page + ... si nécessaire
                                 if ($startPage > 1) {
-                                    echo '<li class="page-item"><a class="page-link" href="?' . 
-                                         http_build_query(array_merge($_GET, ['page' => 1])) . '">1</a></li>';
+                                    echo '<li class="page-item"><a class="page-link" href="?' .
+                                        http_build_query(array_merge($_GET, ['page' => 1])) . '">1</a></li>';
                                     if ($startPage > 2) {
                                         echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                                     }
                                 }
-                                
+
                                 // Pages centrales
                                 for ($i = $startPage; $i <= $endPage; $i++) {
                                     echo '<li class="page-item ' . ($i == $currentPage ? 'active' : '') . '">';
-                                    echo '<a class="page-link" href="?' . 
-                                         http_build_query(array_merge($_GET, ['page' => $i])) . '">' . $i . '</a>';
+                                    echo '<a class="page-link" href="?' .
+                                        http_build_query(array_merge($_GET, ['page' => $i])) . '">' . $i . '</a>';
                                     echo '</li>';
                                 }
-                                
+
                                 // Dernière page + ... si nécessaire
                                 if ($endPage < $totalPages) {
                                     if ($endPage < $totalPages - 1) {
                                         echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                                     }
-                                    echo '<li class="page-item"><a class="page-link" href="?' . 
-                                         http_build_query(array_merge($_GET, ['page' => $totalPages])) . '">' . $totalPages . '</a></li>';
+                                    echo '<li class="page-item"><a class="page-link" href="?' .
+                                        http_build_query(array_merge($_GET, ['page' => $totalPages])) . '">' . $totalPages . '</a></li>';
                                 }
                                 ?>
-                                
+
                                 <li class="page-item <?= $currentPage == $totalPages ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="?<?= 
-                                        http_build_query(array_merge($_GET, ['page' => $currentPage + 1])) 
-                                    ?>" aria-label="Suivant">
+                                    <a class="page-link" href="?<?=
+                                        http_build_query(array_merge($_GET, ['page' => $currentPage + 1]))
+                                        ?>" aria-label="Suivant">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
                             </ul>
                         </nav>
                     <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Required Modal -->
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginRequiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginRequiredModalLabel">Connexion requise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Vous devez être connecté pour adopter un animal. Souhaitez-vous vous connecter ou créer un compte ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a href="signup.php" class="btn btn-primary">S'inscrire / Se connecter</a>
                 </div>
             </div>
         </div>

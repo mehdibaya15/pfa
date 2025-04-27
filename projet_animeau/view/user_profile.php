@@ -1,13 +1,11 @@
 <?php
 session_start();
-include("../config/database.php");
 
-// Redirection si non connecté
 if (!isset($_SESSION['email'])) {
-    header('Location: signup.php');
+    header('Location: index.php'); // Redirige vers la page de login
     exit();
 }
-
+include("../config/database.php");
 // Récupérer les informations utilisateur depuis la base de données
 $user = null;
 if ($_SESSION['email'] == ADMIN_EMAIL) {
