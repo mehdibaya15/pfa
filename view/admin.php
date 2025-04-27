@@ -13,8 +13,6 @@ $avis = getAvis($cnx);
 $users = getUsers($cnx); // Décommentez quand la fonction sera disponible
 $adoptions = getAdoptionRequests($cnx); // Décommentez quand la fonction sera disponible
 
-echo "<script>console.log('question ajouté avec succès: " . json_encode($adoptions) . "');</script>";
-
 ?>
 
 <!DOCTYPE html>
@@ -137,6 +135,13 @@ echo "<script>console.log('question ajouté avec succès: " . json_encode($adopt
             </div>
 
             <div class="col-md-9 p-4">
+                <?php if (isset($_SESSION['message'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?= htmlspecialchars($_SESSION['message']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['message']); ?>
+                <?php endif; ?>
                 <!-- Section Animaux -->
                 <div id="animals-section" class="section active">
                     <div class="card mb-4">
@@ -197,6 +202,7 @@ echo "<script>console.log('question ajouté avec succès: " . json_encode($adopt
                                                         data-bs-target="#deleteModal">
                                                         <i class="fas fa-trash"></i>
                                                     </a>
+
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -398,13 +404,28 @@ echo "<script>console.log('question ajouté avec succès: " . json_encode($adopt
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <a id="confirmDelete" href="#" class="btn btn-danger">Supprimer</a>
+
                 </div>
-                
+
             </div>
         </div>
-        
+
     </div>
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const confirmDeleteLink = document.getElementById('confirmDelete');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const animalId = this.getAttribute('data-id');
+                    // Set the href dynamically with the correct animal ID
+                    confirmDeleteLink.href = 'delete_animal.php?id=' + animalId;
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>
