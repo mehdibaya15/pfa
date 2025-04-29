@@ -123,10 +123,49 @@ try {
 
         /* Card styling */
         .animal-card {
-            position: relative;
-            transition: transform 0.3s ease;
-            height: 100%;
-        }
+        position: relative;
+        transition: transform 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        width: -webkit-fill-available;
+    }
+
+    .card-img-top {
+        object-fit: cover; /* Ensures images maintain aspect ratio */
+        width: 100%;
+    }
+
+    .card-body {
+        flex: 1; /* Makes the card body grow to fill available space */
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .card-text {
+        flex-grow: 1; /* Makes the description take up available space */
+        overflow: hidden; /* Hides overflow text */
+        text-overflow: ellipsis; /* Adds ellipsis if text is too long */
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Limits to 3 lines */
+        -webkit-box-orient: vertical;
+    }
+
+    /* Ensure the adoption button stays at the bottom */
+    .mt-3 {
+        margin-top: auto !important; /* Pushes the button to the bottom */
+    }
+
+    /* Make sure all cards in a row have equal height */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .mb-4 {
+        display: flex;
+    }
 
         .animal-card:hover {
             transform: translateY(-5px);
@@ -146,6 +185,13 @@ try {
             align-items: center;
             gap: 3px;
         }
+        .card-body {
+        flex: 1; /* Makes the card body grow to fill available space */
+        display: flex;
+        flex-direction: column;
+    }
+    
+        
     </style>
 </head>
 
